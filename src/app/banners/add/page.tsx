@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { api } from '@/lib/api';
 import { ArrowLeft, Save, Upload } from 'lucide-react';
 import Link from 'next/link';
 
-export default function AddBannerPage() {
+function AddBannerForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [loading, setLoading] = useState(false);
@@ -160,5 +160,13 @@ export default function AddBannerPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function AddBannerPage() {
+    return (
+        <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center' }}>Loading...</div>}>
+            <AddBannerForm />
+        </Suspense>
     );
 }
