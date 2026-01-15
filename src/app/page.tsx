@@ -1,65 +1,103 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useState, useEffect } from 'react';
+import { DollarSign, ShoppingBag, Users, TrendingUp, Package, AlertTriangle } from 'lucide-react';
+import DashboardChart from '@/components/DashboardChart';
+import styles from './page.module.css';
+import { api } from '@/lib/api';
+
+interface StatCardProps {
+  title: string;
+  value: string;
+  change: number;
+  icon: React.ElementType;
+  color: string;
+}
+
+function StatCard({ title, value, change, icon: Icon, color }: StatCardProps) {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <div className="flex-between">
+        <div style={{ padding: '0.75rem', borderRadius: '0.75rem', backgroundColor: `rgba(${color}, 0.2)` }}>
+          <Icon color={`rgb(${color})`} size={24} />
+        </div>
+        <span className={`badge ${change >= 0 ? 'badge-success' : 'badge-error'}`}>
+          {change >= 0 ? '+' : ''}{change}%
+        </span>
+      </div>
+      <div>
+        <h3 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '0.25rem' }}>{value}</h3>
+        <p className="text-muted" style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>{title}</p>
+      </div>
+    </div>
+  );
+}
+
+export default function Dashboard() {
+  const [stats, setStats] = useState({
+    productCount: 0,
+    lowStockCount: 0,
+    totalValue: 0,
+    totalStock: 0
+  });
+
+  useEffect(() => {
+    async function loadStats() {
+      const data = await api.products.getStats();
+      setStats(data);
+    }
+    loadStats();
+  }, []);
+
+  return (
+    <div>
+      <div className={styles.header}>
+        <h1 className={styles.title}>Dashboard Overview</h1>
+        <p className={styles.subtitle}>Welcome back, Admin. Here is what's happening today.</p>
+      </div>
+
+      <div className={styles.grid}>
+        <StatCard
+          title="Total Revenue Estimate"
+          value={`$${stats.totalValue.toLocaleString()}`}
+          change={12}
+          icon={DollarSign}
+          color="99, 102, 241"
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+        <StatCard
+          title="Total Stock Items"
+          value={stats.totalStock.toLocaleString()}
+          change={8}
+          icon={Package}
+          color="236, 72, 153"
+        />
+        <StatCard
+          title="Active Products"
+          value={stats.productCount.toLocaleString()}
+          change={5}
+          icon={ShoppingBag}
+          color="16, 185, 129"
+        />
+        <StatCard
+          title="Low Stock Warning"
+          value={stats.lowStockCount.toLocaleString()}
+          change={-2}
+          icon={AlertTriangle}
+          color="245, 158, 11"
+        />
+      </div>
+
+      <div className={styles.chartContainer}>
+        <div className={styles.chartHeader}>
+          <h2 className={styles.sectionTitle}>Sales Analytics</h2>
+          <select className="input" style={{ width: 'auto' }}>
+            <option>Last 7 Days</option>
+            <option>Last 30 Days</option>
+            <option>This Year</option>
+          </select>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+        <DashboardChart />
+      </div>
     </div>
   );
 }
