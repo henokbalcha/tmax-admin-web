@@ -17,6 +17,36 @@ export interface Product {
     status?: string; // Admin only field
 }
 
+export interface Order {
+    id: string;
+    user_id: string;
+    total_amount: number;
+    status: string;
+    shipping_address: string;
+    payment_method: string;
+    created_at: string;
+    items?: OrderItem[];
+}
+
+export interface OrderItem {
+    id: string;
+    order_id: string;
+    product_id: string;
+    quantity: number;
+    price_at_purchase: number;
+    variant?: string;
+    product?: Product;
+}
+
+export interface Banner {
+    id?: string;
+    title: string;
+    subtitle: string;
+    discount_text: string;
+    image_url: string;
+    active: boolean;
+}
+
 export const api = {
     products: {
         async list() {
@@ -115,6 +145,65 @@ export const api = {
                 totalValue,
                 totalStock
             };
+        }
+    },
+    orders: {
+        async list() {
+            const { data, error } = await supabase
+                .from('orders')
+                .select('*, items:order_items(*, product:products(*))')
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+            return data as Order[];
+        },
+        async updateStatus(id: string, status: string) {
+            const { data, error } = await supabase
+                .from('orders')
+                .update({ status })
+                .eq('id', id)
+                .select()
+                .single();
+            if (error) throw error;
+            return data;
+        }
+    },
+    banners: {
+        async list() {
+            const { data, error } = await supabase
+                .from('banners')
+                .select('*')
+                .order('active', { ascending: false }); // Active first
+            if (error) throw error;
+            return data as Banner[];
+        },
+        async create(banner: Banner) {
+            const { data, error } = await supabase
+                .from('banners')
+                .insert([banner])
+                .select()
+                .single();
+            if (error) throw error;
+            return data;
+        },
+        async delete(id: string) {
+            const { error } = await supabase
+                .from('banners')
+                .delete()
+                .eq('id', id);
+            if (error) throw error;
+        },
+        async setActive(id: string) {
+            // First set all to inactive (optional if logic allows multiple, but usually one banner)
+            // For now, let's just update the target
+            const { data, error } = await supabase
+                .from('banners')
+                .update({ active: true })
+                .eq('id', id)
+                .select()
+                .single();
+            if (error) throw error;
+            return data;
         }
     }
 };

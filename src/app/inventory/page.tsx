@@ -196,8 +196,8 @@ export default function InventoryPage() {
                                     </td>
                                     <td className={styles.td}>
                                         <span className={`badge ${product.status === 'Active' ? 'badge-success' :
-                                                product.status === 'Low Stock' ? 'badge-warning' :
-                                                    'badge-error'
+                                            product.status === 'Low Stock' ? 'badge-warning' :
+                                                'badge-error'
                                             }`}>
                                             {product.status || 'Draft'}
                                         </span>
@@ -234,6 +234,17 @@ export default function InventoryPage() {
                                                 >
                                                     Edit
                                                 </Link>
+                                                <button
+                                                    className="btn btn-ghost"
+                                                    style={{ borderRadius: 0, justifyContent: 'flex-start', width: '100%' }}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        // Navigate to Add Banner page with pre-filled data
+                                                        window.location.href = `/banners/add?productId=${product.id}&title=${encodeURIComponent(product.name)}&image=${encodeURIComponent(product.image_url)}`;
+                                                    }}
+                                                >
+                                                    Promote to Banner
+                                                </button>
                                                 <button
                                                     className="btn btn-ghost"
                                                     style={{ borderRadius: 0, justifyContent: 'flex-start', width: '100%', color: 'var(--error)' }}

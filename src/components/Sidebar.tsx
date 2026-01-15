@@ -2,12 +2,14 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Package, PlusCircle, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, Package, PlusCircle, Settings, LogOut, ShoppingCart, Image } from 'lucide-react';
 import styles from './Sidebar.module.css';
 
 const menuItems = [
     { name: 'Dashboard', href: '/', icon: LayoutDashboard },
+    { name: 'Orders', href: '/orders', icon: ShoppingCart },
     { name: 'Inventory', href: '/inventory', icon: Package },
+    { name: 'Banners', href: '/banners', icon: Image },
     { name: 'Add Product', href: '/products/add', icon: PlusCircle },
     { name: 'Settings', href: '/settings', icon: Settings },
 ];
