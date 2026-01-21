@@ -1,43 +1,38 @@
 :root {
   /* Brand Colors */
   --primary: #29B6F6;
-  /* Tmax Blue */
   --primary-hover: #039BE5;
-  /* Darker Blue */
   --secondary: #ec4899;
-  /* Pink 500 */
 
-  /* Neutral Colors (Dark Theme Default) */
+  /* Default Dark Theme */
   --bg-app: #0f172a;
-  /* Slate 900 */
   --bg-panel: #1e293b;
-  /* Slate 800 */
   --bg-card: #1e293b;
   --border: #334155;
-  /* Slate 700 */
-
-  /* Text Colors */
   --text-main: #f8fafc;
-  /* Slate 50 */
   --text-muted: #94a3b8;
-  /* Slate 400 */
+  --input-bg: rgba(0, 0, 0, 0.2);
 
-  /* Status Colors */
   --success: #10b981;
   --warning: #f59e0b;
   --error: #ef4444;
 
-  /* Dimensions */
   --sidebar-width: 260px;
   --header-height: 70px;
-
-  /* Shadows */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-
-  /* Transitions */
   --transition-fast: 0.2s ease;
+}
+
+[data-theme='light'] {
+  --bg-app: #f1f5f9;
+  --bg-panel: #ffffff;
+  --bg-card: #ffffff;
+  --border: #e2e8f0;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --input-bg: #ffffff;
 }
 
 * {
@@ -152,7 +147,7 @@ h3 {
 
 .input {
   width: 100%;
-  background-color: rgba(0, 0, 0, 0.2);
+  background-color: var(--input-bg);
   border: 1px solid var(--border);
   padding: 0.75rem 1rem;
   border-radius: 0.5rem;

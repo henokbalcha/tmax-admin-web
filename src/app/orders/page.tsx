@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { api, Order } from '@/lib/api';
 import { MoreVertical, Search, Filter } from 'lucide-react';
+import Link from 'next/link';
 import styles from '../inventory/page.module.css'; // Reusing inventory styles
 
 export default function OrdersPage() {
@@ -82,7 +83,11 @@ export default function OrdersPage() {
                         <tbody>
                             {filteredOrders.map((order) => (
                                 <tr key={order.id} className={styles.tr}>
-                                    <td className={styles.td} style={{ fontSize: '0.8rem' }}>{order.id.substring(0, 8)}...</td>
+                                    <td className={styles.td} style={{ fontSize: '0.8rem' }}>
+                                        <Link href={`/orders/${order.id}`} className="link">
+                                            {order.id.substring(0, 8).toUpperCase()}
+                                        </Link>
+                                    </td>
                                     <td className={styles.td}>{new Date(order.created_at).toLocaleDateString()}</td>
                                     <td className={styles.td}>{order.user_id.substring(0, 8)}...</td>
                                     <td className={styles.td}>
@@ -112,8 +117,15 @@ export default function OrdersPage() {
                                             <option value="CANCELLED">Cancelled</option>
                                         </select>
                                     </td>
-                                    <td className={styles.td} style={{ maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                        {order.shipping_address}
+                                    <td className={styles.td}>
+                                        <div className="flex-center" style={{ gap: '1rem' }}>
+                                            <span style={{ maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                {order.shipping_address}
+                                            </span>
+                                            <Link href={`/orders/${order.id}`} className="btn btn-ghost" style={{ padding: '4px 8px', fontSize: '0.75rem' }}>
+                                                View
+                                            </Link>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}

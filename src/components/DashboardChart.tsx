@@ -2,7 +2,11 @@
 
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
-const data = [
+interface DashboardChartProps {
+    data?: any[];
+}
+
+const defaultData = [
     { name: 'Mon', sales: 4000, revenue: 2400 },
     { name: 'Tue', sales: 3000, revenue: 1398 },
     { name: 'Wed', sales: 2000, revenue: 9800 },
@@ -12,7 +16,7 @@ const data = [
     { name: 'Sun', sales: 3490, revenue: 4300 },
 ];
 
-export default function DashboardChart() {
+export default function DashboardChart({ data = defaultData }: DashboardChartProps) {
     return (
         <ResponsiveContainer width="100%" height="100%">
             <AreaChart

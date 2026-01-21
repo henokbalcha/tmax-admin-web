@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Package, PlusCircle, Settings, LogOut, ShoppingCart, Image } from 'lucide-react';
+import { LayoutDashboard, Package, PlusCircle, Settings, LogOut, ShoppingCart, Image, Users } from 'lucide-react';
 import styles from './Sidebar.module.css';
 
 const menuItems = [
@@ -10,6 +10,7 @@ const menuItems = [
     { name: 'Orders', href: '/orders', icon: ShoppingCart },
     { name: 'Inventory', href: '/inventory', icon: Package },
     { name: 'Banners', href: '/banners', icon: Image },
+    { name: 'Users', href: '/users', icon: Users },
     { name: 'Add Product', href: '/products/add', icon: PlusCircle },
     { name: 'Settings', href: '/settings', icon: Settings },
 ];

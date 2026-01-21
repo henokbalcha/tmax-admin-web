@@ -25,6 +25,7 @@ export interface Order {
     shipping_address: string;
     payment_method: string;
     created_at: string;
+    receipt_url?: string;
     items?: OrderItem[];
 }
 

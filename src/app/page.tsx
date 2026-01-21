@@ -38,15 +38,47 @@ export default function Dashboard() {
     productCount: 0,
     lowStockCount: 0,
     totalValue: 0,
-    totalStock: 0
+    totalStock: 0,
+    orderCount: 0,
+    revenue: 0,
+    growth: 15
   });
+  const [chartData, setChartData] = useState<any[]>([]);
 
   useEffect(() => {
-    async function loadStats() {
-      const data = await api.products.getStats();
-      setStats(data);
+    async function loadData() {
+      try {
+        const productStats = await api.products.getStats();
+        const orders = await api.orders.list();
+
+        const totalRev = orders.reduce((sum, o) => sum + o.total_amount, 0);
+
+        setStats({
+          ...productStats,
+          orderCount: orders.length,
+          revenue: totalRev,
+          growth: 12
+        });
+
+        // Simple aggregation for chart (last 7 days)
+        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const processedChart = days.map(day => {
+          const dayOrders = orders.filter(o => {
+            const d = new Date(o.created_at);
+            return d.getDay() === days.indexOf(day);
+          });
+          return {
+            name: day,
+            sales: dayOrders.length,
+            revenue: dayOrders.reduce((sum, o) => sum + o.total_amount, 0)
+          };
+        });
+        setChartData(processedChart);
+      } catch (e) {
+        console.error(e);
+      }
     }
-    loadStats();
+    loadData();
   }, []);
 
   return (
@@ -58,24 +90,24 @@ export default function Dashboard() {
 
       <div className={styles.grid}>
         <StatCard
-          title="Total Revenue Estimate"
-          value={`$${stats.totalValue.toLocaleString()}`}
-          change={12}
+          title="Total Revenue"
+          value={`$${stats.revenue.toLocaleString()}`}
+          change={stats.growth}
           icon={DollarSign}
           color="99, 102, 241"
         />
         <StatCard
-          title="Total Stock Items"
-          value={stats.totalStock.toLocaleString()}
+          title="Total Orders"
+          value={stats.orderCount.toLocaleString()}
           change={8}
-          icon={Package}
+          icon={ShoppingBag}
           color="236, 72, 153"
         />
         <StatCard
           title="Active Products"
           value={stats.productCount.toLocaleString()}
           change={5}
-          icon={ShoppingBag}
+          icon={Package}
           color="16, 185, 129"
         />
         <StatCard
@@ -89,14 +121,15 @@ export default function Dashboard() {
 
       <div className={styles.chartContainer}>
         <div className={styles.chartHeader}>
-          <h2 className={styles.sectionTitle}>Sales Analytics</h2>
+          <h2 className={styles.sectionTitle}>Sales Analytics (By Day)</h2>
           <select className="input" style={{ width: 'auto' }}>
             <option>Last 7 Days</option>
             <option>Last 30 Days</option>
-            <option>This Year</option>
           </select>
         </div>
-        <DashboardChart />
+        <div style={{ height: '300px', width: '100%' }}>
+          <DashboardChart data={chartData} />
+        </div>
       </div>
     </div>
   );
