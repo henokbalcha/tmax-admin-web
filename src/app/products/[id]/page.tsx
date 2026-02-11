@@ -277,12 +277,12 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                                     value={formData.category}
                                     onChange={handleChange}
                                 >
-                                    <option>Electronics</option>
-                                    <option>Home Appliances</option>
-                                    <option>Accessories</option>
-                                    <option>Computers</option>
-                                    <option>Audio</option>
-                                    <option>Wearables</option>
+                                    <option>Power Banks</option>
+                                    <option>Flash</option>
+                                    <option>Charger & Cable</option>
+                                    <option>Dividers</option>
+                                    <option>Laptop Chargers</option>
+                                    <option>Mobile batteries</option>
                                 </select>
                             </div>
 

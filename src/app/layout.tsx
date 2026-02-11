@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "T-MAX Admin | Control Center",
   description: "Advanced inventory, order management, and analytics dashboard for T-MAX Electronics.",
-  keywords: ["T-MAX", "Electronics", "Admin Panel", "Inventory Management", "Order Tracking"],
+  keywords: ["T-MAX", "Power Banks", "Flash", "Charger & Cable", "Dividers", "Laptop Chargers", "Mobile batteries", "Admin Panel", "Inventory Management"],
   authors: [{ name: "T-MAX Team" }],
   viewport: "width=device-width, initial-scale=1",
 };
