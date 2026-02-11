@@ -128,10 +128,13 @@ export const api = {
                 .from('products')
                 .select('*', { count: 'exact', head: true });
 
+            // Get threshold from settings
+            const threshold = parseInt(await api.settings.get('low_stock_threshold') || '10');
+
             const { count: lowStockCount } = await supabase
                 .from('products')
                 .select('*', { count: 'exact', head: true })
-                .lt('stock', 10);
+                .lt('stock', threshold);
 
             const { data: products } = await supabase
                 .from('products')
@@ -203,6 +206,32 @@ export const api = {
                 .eq('id', id)
                 .select()
                 .single();
+            if (error) throw error;
+            return data;
+        }
+    },
+    settings: {
+        async get(key: string) {
+            const { data, error } = await supabase
+                .from('settings')
+                .select('value')
+                .eq('key', key)
+                .single();
+
+            if (error) {
+                // Return default if not found or error
+                if (key === 'low_stock_threshold') return '10';
+                return null;
+            }
+            return data.value;
+        },
+        async set(key: string, value: string) {
+            const { data, error } = await supabase
+                .from('settings')
+                .upsert({ key, value }, { onConflict: 'key' })
+                .select()
+                .single();
+
             if (error) throw error;
             return data;
         }

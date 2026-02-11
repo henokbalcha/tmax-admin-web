@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { User, Bell, Shield, Palette, Save } from 'lucide-react';
+import { api } from '@/lib/api';
 import styles from './page.module.css';
 
 export default function SettingsPage() {
+
     const [theme, setTheme] = useState(() => {
         if (typeof window !== 'undefined') {
             return document.documentElement.getAttribute('data-theme') || 'dark';
@@ -13,12 +15,35 @@ export default function SettingsPage() {
     });
 
     const [stockThreshold, setStockThreshold] = useState(10);
+    const [loading, setLoading] = useState(false);
+
+    // Initial load
+    useEffect(() => {
+        const loadSettings = async () => {
+            const value = await api.settings.get('low_stock_threshold');
+            if (value) setStockThreshold(parseInt(value));
+        };
+        loadSettings();
+    }, []);
 
     const toggleTheme = () => {
         const newTheme = theme === 'dark' ? 'light' : 'dark';
         setTheme(newTheme);
         document.documentElement.setAttribute('data-theme', newTheme);
         localStorage.setItem('theme', newTheme);
+    };
+
+    const handleSave = async () => {
+        setLoading(true);
+        try {
+            await api.settings.set('low_stock_threshold', stockThreshold.toString());
+            alert('Settings saved successfully!');
+        } catch (error) {
+            console.error('Failed to save settings:', error);
+            alert('Failed to save settings.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -28,9 +53,9 @@ export default function SettingsPage() {
                     <h1>Settings</h1>
                     <p className="text-muted">Manage your account and preferences</p>
                 </div>
-                <button className="btn btn-primary" onClick={() => alert('Settings saved!')}>
+                <button className="btn btn-primary" onClick={handleSave} disabled={loading}>
                     <Save size={18} />
-                    Save Changes
+                    {loading ? 'Saving...' : 'Save Changes'}
                 </button>
             </div>
 
