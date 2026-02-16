@@ -22,7 +22,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         original_price: 0,
         stock: 0,
         sku: '',
-        category: 'Electronics',
+        category: 'Power Banks',
         status: 'Active',
         brand: 'TMAX',
         image_url: '',
@@ -281,12 +281,12 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                                     value={formData.category}
                                     onChange={handleChange}
                                 >
-                                    <option>Power Banks</option>
-                                    <option>Flash</option>
-                                    <option>Charger & Cable</option>
-                                    <option>Dividers</option>
-                                    <option>Laptop Chargers</option>
-                                    <option>Mobile batteries</option>
+                                    <option value="Power Banks">Power Banks</option>
+                                    <option value="Flash">Flash</option>
+                                    <option value="Charger & Cable">Charger & Cable</option>
+                                    <option value="Dividers">Dividers</option>
+                                    <option value="Laptop Chargers">Laptop Chargers</option>
+                                    <option value="Mobile batteries">Mobile batteries</option>
                                 </select>
                             </div>
 
@@ -298,11 +298,11 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                                     value={formData.status}
                                     onChange={handleChange}
                                 >
-                                    <option>Draft</option>
-                                    <option>Active</option>
-                                    <option>Archived</option>
-                                    <option>Out of Stock</option>
-                                    <option>Low Stock</option>
+                                    <option value="Draft">Draft</option>
+                                    <option value="Active">Active</option>
+                                    <option value="Archived">Archived</option>
+                                    <option value="Out of Stock">Out of Stock</option>
+                                    <option value="Low Stock">Low Stock</option>
                                 </select>
                             </div>
                         </div>
