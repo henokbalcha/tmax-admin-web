@@ -94,7 +94,15 @@ export default function InventoryPage() {
     const filteredProducts = products.filter(p => {
         const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
             p.sku?.toLowerCase().includes(search.toLowerCase());
-        const matchesStatus = statusFilter === 'All' || p.status === statusFilter;
+        
+        let matchesStatus = false;
+        if (statusFilter === 'All') {
+            // By default show everything EXCEPT Archived
+            matchesStatus = p.status !== 'Archived';
+        } else {
+            matchesStatus = p.status === statusFilter;
+        }
+        
         return matchesSearch && matchesStatus;
     });
 
@@ -142,11 +150,12 @@ export default function InventoryPage() {
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
                     >
-                        <option value="All">All Status</option>
-                        <option value="Active">Active</option>
+                        <option value="All">All Active</option>
+                        <option value="Active">Active Only</option>
                         <option value="Draft">Draft</option>
                         <option value="Low Stock">Low Stock</option>
                         <option value="Out of Stock">Out of Stock</option>
+                        <option value="Archived">Archived</option>
                     </select>
                 </div>
             </div>
