@@ -98,7 +98,11 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
             router.push('/inventory');
         } catch (error: any) {
             console.error('Failed to delete product:', error);
-            alert(`Failed to delete product: ${error.message || error.toString()}`);
+            let errorMessage = error.message || error.toString();
+            if (errorMessage.includes('order_items')) {
+                errorMessage = "This product cannot be deleted because it exists in past orders. Try setting its status to 'Archived' instead.";
+            }
+            alert(`Failed to delete product: ${errorMessage}`);
             setLoading(false);
         }
     };

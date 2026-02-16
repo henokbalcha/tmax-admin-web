@@ -60,9 +60,13 @@ export default function InventoryPage() {
             await api.products.delete(id);
             setOpenMenuId(null);
             fetchProducts();
-        } catch (error) {
+        } catch (error: any) {
             console.error("Delete failed", error);
-            alert("Failed to delete product");
+            let errorMessage = error.message || error.toString();
+            if (errorMessage.includes('order_items')) {
+                errorMessage = "This product cannot be deleted because it exists in past orders. Try archiving it instead.";
+            }
+            alert(`Failed to delete product: ${errorMessage}`);
         }
     };
 
