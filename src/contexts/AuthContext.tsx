@@ -26,9 +26,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             const currentUser = await api.auth.getUser();
             setUser(currentUser);
 
-            // For now, let's say anyone with @tmax.com is an admin
-            // Or we could check metadata: currentUser?.user_metadata?.role === 'admin'
-            if (currentUser?.email?.endsWith('@tmax.com')) {
+            // Admin check: 
+            // 1. Check for specific email domain
+            // 2. Check for 'role' in user metadata
+            const isTmaxEmail = currentUser?.email?.endsWith('@tmax.com');
+            const hasAdminRole = currentUser?.user_metadata?.role === 'admin';
+
+            if (isTmaxEmail || hasAdminRole) {
                 setIsAdmin(true);
             }
 
