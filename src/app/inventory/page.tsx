@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { MoreVertical, Filter, Download, Plus, Search } from 'lucide-react';
+import { MoreVertical, Filter, Download, Plus, Search, Trash2, Edit } from 'lucide-react';
 import Link from 'next/link';
 import styles from './page.module.css';
 import { api, Product } from '@/lib/api';
@@ -207,10 +207,9 @@ export default function InventoryPage() {
                                             {product.status || 'Draft'}
                                         </span>
                                     </td>
-                                    <td className={styles.td} style={{ position: 'relative' }}>
+                                    <td className={styles.tdMenu}>
                                         <button
-                                            className="btn btn-ghost"
-                                            style={{ padding: '0.25rem' }}
+                                            className={styles.menuButton}
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 setOpenMenuId(openMenuId === product.id ? null : product.id!);
@@ -220,48 +219,33 @@ export default function InventoryPage() {
                                         </button>
 
                                         {openMenuId === product.id && (
-                                            <div style={{
-                                                position: 'absolute',
-                                                right: '1rem',
-                                                top: '3rem',
-                                                backgroundColor: 'var(--bg-card)',
-                                                border: '1px solid var(--border)',
-                                                borderRadius: '0.5rem',
-                                                boxShadow: 'var(--shadow-lg)',
-                                                zIndex: 100,
-                                                minWidth: '160px',
-                                                display: 'flex',
-                                                flexDirection: 'column',
-                                                overflow: 'hidden'
-                                            }}
-                                                onClick={(e) => e.stopPropagation()}
-                                            >
+                                            <div className={styles.dropdown} onClick={(e) => e.stopPropagation()}>
                                                 <Link
                                                     href={`/products/${product.id}`}
-                                                    className="btn btn-ghost"
-                                                    style={{ borderRadius: 0, justifyContent: 'flex-start', width: '100%', padding: '0.75rem 1rem' }}
+                                                    className={styles.dropdownItem}
                                                     onClick={() => setOpenMenuId(null)}
                                                 >
+                                                    <Edit size={16} className={styles.dropdownIcon} />
                                                     Edit Product
                                                 </Link>
                                                 <button
-                                                    className="btn btn-ghost"
-                                                    style={{ borderRadius: 0, justifyContent: 'flex-start', width: '100%', padding: '0.75rem 1rem' }}
+                                                    className={styles.dropdownItem}
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         router.push(`/banners/add?productId=${product.id}&title=${encodeURIComponent(product.name)}&image=${encodeURIComponent(product.image_url)}`);
                                                         setOpenMenuId(null);
                                                     }}
                                                 >
+                                                    <Filter size={16} className={styles.dropdownIcon} />
                                                     Promote to Banner
                                                 </button>
-                                                <div style={{ height: '1px', background: 'var(--border)' }}></div>
+                                                <div className={styles.dropdownDivider}></div>
                                                 <button
-                                                    className="btn btn-ghost"
-                                                    style={{ borderRadius: 0, justifyContent: 'flex-start', width: '100%', color: 'var(--error)', padding: '0.75rem 1rem' }}
+                                                    className={`${styles.dropdownItem} ${styles.dropdownItemDelete}`}
                                                     onClick={(e) => handleDelete(product.id!, e)}
                                                 >
-                                                    Delete
+                                                    <Trash2 size={16} className={styles.dropdownIcon} />
+                                                    Delete Item
                                                 </button>
                                             </div>
                                         )}
