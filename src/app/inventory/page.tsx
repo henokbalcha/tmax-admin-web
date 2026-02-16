@@ -1,18 +1,19 @@
 "use client";
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { MoreVertical, Filter, Download, Plus, Search } from 'lucide-react';
 import Link from 'next/link';
 import styles from './page.module.css';
 import { api, Product } from '@/lib/api';
 
 export default function InventoryPage() {
+    const router = useRouter();
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState('All');
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
-    const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
 
     useEffect(() => {
         fetchProducts();
@@ -22,10 +23,8 @@ export default function InventoryPage() {
     useEffect(() => {
         const handleClickOutside = () => setOpenMenuId(null);
         document.addEventListener('click', handleClickOutside);
-        window.addEventListener('scroll', handleClickOutside, true);
         return () => {
             document.removeEventListener('click', handleClickOutside);
-            window.removeEventListener('scroll', handleClickOutside, true);
         };
     }, []);
 
@@ -40,14 +39,7 @@ export default function InventoryPage() {
         }
     }
 
-    const toggleMenu = (e: React.MouseEvent, id: string) => {
-        e.stopPropagation();
-        e.preventDefault();
-        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-        // Position menu to the left of the button
-        setMenuPos({ x: rect.left - 140, y: rect.bottom + 5 });
-        setOpenMenuId(openMenuId === id ? null : id);
-    };
+
 
     const handleDelete = async (id: string, e: React.MouseEvent) => {
         e.stopPropagation();
@@ -94,7 +86,7 @@ export default function InventoryPage() {
     const filteredProducts = products.filter(p => {
         const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
             p.sku?.toLowerCase().includes(search.toLowerCase());
-        
+
         let matchesStatus = false;
         if (statusFilter === 'All') {
             // By default show everything EXCEPT Archived
@@ -102,7 +94,7 @@ export default function InventoryPage() {
         } else {
             matchesStatus = p.status === statusFilter;
         }
-        
+
         return matchesSearch && matchesStatus;
     });
 
@@ -215,25 +207,29 @@ export default function InventoryPage() {
                                             {product.status || 'Draft'}
                                         </span>
                                     </td>
-                                    <td className={styles.td}>
+                                    <td className={styles.td} style={{ position: 'relative' }}>
                                         <button
                                             className="btn btn-ghost"
                                             style={{ padding: '0.25rem' }}
-                                            onClick={(e) => toggleMenu(e, product.id!)}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setOpenMenuId(openMenuId === product.id ? null : product.id!);
+                                            }}
                                         >
                                             <MoreVertical size={18} />
                                         </button>
+
                                         {openMenuId === product.id && (
                                             <div style={{
-                                                position: 'fixed',
-                                                left: menuPos.x,
-                                                top: menuPos.y,
+                                                position: 'absolute',
+                                                right: '1rem',
+                                                top: '3rem',
                                                 backgroundColor: 'var(--bg-card)',
                                                 border: '1px solid var(--border)',
                                                 borderRadius: '0.5rem',
                                                 boxShadow: 'var(--shadow-lg)',
-                                                zIndex: 9999,
-                                                minWidth: '120px',
+                                                zIndex: 100,
+                                                minWidth: '160px',
                                                 display: 'flex',
                                                 flexDirection: 'column',
                                                 overflow: 'hidden'
@@ -243,24 +239,26 @@ export default function InventoryPage() {
                                                 <Link
                                                     href={`/products/${product.id}`}
                                                     className="btn btn-ghost"
-                                                    style={{ borderRadius: 0, justifyContent: 'flex-start', width: '100%' }}
+                                                    style={{ borderRadius: 0, justifyContent: 'flex-start', width: '100%', padding: '0.75rem 1rem' }}
+                                                    onClick={() => setOpenMenuId(null)}
                                                 >
-                                                    Edit
+                                                    Edit Product
                                                 </Link>
                                                 <button
                                                     className="btn btn-ghost"
-                                                    style={{ borderRadius: 0, justifyContent: 'flex-start', width: '100%' }}
+                                                    style={{ borderRadius: 0, justifyContent: 'flex-start', width: '100%', padding: '0.75rem 1rem' }}
                                                     onClick={(e) => {
                                                         e.stopPropagation();
-                                                        // Navigate to Add Banner page with pre-filled data
-                                                        window.location.href = `/banners/add?productId=${product.id}&title=${encodeURIComponent(product.name)}&image=${encodeURIComponent(product.image_url)}`;
+                                                        router.push(`/banners/add?productId=${product.id}&title=${encodeURIComponent(product.name)}&image=${encodeURIComponent(product.image_url)}`);
+                                                        setOpenMenuId(null);
                                                     }}
                                                 >
                                                     Promote to Banner
                                                 </button>
+                                                <div style={{ height: '1px', background: 'var(--border)' }}></div>
                                                 <button
                                                     className="btn btn-ghost"
-                                                    style={{ borderRadius: 0, justifyContent: 'flex-start', width: '100%', color: 'var(--error)' }}
+                                                    style={{ borderRadius: 0, justifyContent: 'flex-start', width: '100%', color: 'var(--error)', padding: '0.75rem 1rem' }}
                                                     onClick={(e) => handleDelete(product.id!, e)}
                                                 >
                                                     Delete

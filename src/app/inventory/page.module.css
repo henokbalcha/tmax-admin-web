@@ -23,7 +23,9 @@
     background-color: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 1rem;
-    overflow: hidden;
+    /* overflow: hidden; Removed to allow menus to be visible */
+    position: relative;
+    margin-bottom: 2rem;
 }
 
 .table {

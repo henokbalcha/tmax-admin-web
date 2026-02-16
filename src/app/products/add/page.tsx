@@ -18,10 +18,11 @@ export default function AddProductPage() {
         original_price: 0,
         stock: 0,
         sku: '',
-        category: 'Power Banks',
+        category: 'Electronics',
         status: 'Active',
         brand: 'TMAX',
         image_url: '',
+        images: [],
         rating: 0,
         review_count: 0
     });
@@ -34,20 +35,59 @@ export default function AddProductPage() {
         }));
     };
 
-    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, index?: number) => {
         if (!e.target.files || e.target.files.length === 0) return;
 
         try {
             setUploading(true);
             const file = e.target.files[0];
             const publicUrl = await api.products.uploadImage(file);
-            setFormData(prev => ({ ...prev, image_url: publicUrl }));
+
+            setFormData(prev => {
+                const currentImages = [...(prev.images || [])];
+                let newImages: string[] = [];
+
+                if (typeof index === 'number') {
+                    // Place in specific slot, ensuring array is large enough
+                    newImages = [...currentImages];
+                    while (newImages.length <= index) newImages.push('');
+                    newImages[index] = publicUrl;
+                } else {
+                    // Just append
+                    newImages = [...currentImages, publicUrl].slice(0, 4);
+                }
+
+                return {
+                    ...prev,
+                    images: newImages,
+                    // If no main image_url is set, set this one as main
+                    image_url: prev.image_url || publicUrl
+                };
+            });
         } catch (error) {
             console.error('Upload failed:', error);
             alert('Failed to upload image');
         } finally {
             setUploading(false);
         }
+    };
+
+    const setAsMain = (url: string) => {
+        setFormData(prev => ({ ...prev, image_url: url }));
+    };
+
+    const removeImage = (index: number) => {
+        setFormData(prev => {
+            const currentImages = prev.images || [];
+            const removedUrl = currentImages[index];
+            const newImages = currentImages.filter((_, i) => i !== index);
+
+            return {
+                ...prev,
+                images: newImages,
+                image_url: prev.image_url === removedUrl ? (newImages[0] || '') : prev.image_url
+            };
+        });
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -60,7 +100,13 @@ export default function AddProductPage() {
                 return;
             }
 
-            await api.products.create(formData as Omit<Product, 'id'>);
+            // Filter out empty strings/holes from images array before saving
+            const finalImages = (formData.images || []).filter(img => img && img.trim() !== '');
+
+            await api.products.create({
+                ...formData,
+                images: finalImages
+            } as Omit<Product, 'id'>);
             router.push('/inventory');
         } catch (error: any) {
             console.error('Failed to create product:', error);
@@ -129,34 +175,97 @@ export default function AddProductPage() {
                             </div>
                         </div>
 
-                        <div className={sectionContent}>
-                            <h2 className={styles.sectionTitle}>Media</h2>
-                            <div className={styles.uploadArea}>
-                                <input
-                                    type="file"
-                                    id="file-upload"
-                                    hidden
-                                    accept="image/*"
-                                    onChange={handleFileChange}
-                                />
-                                <label htmlFor="file-upload" style={{ cursor: 'pointer', display: 'block' }}>
-                                    <div className="flex-center" style={{ marginBottom: '1rem', flexDirection: 'column', gap: '1rem' }}>
-                                        {formData.image_url ? (
-                                            <img src={formData.image_url} alt="Preview" style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '8px' }} />
-                                        ) : (
-                                            <div style={{ padding: '1rem', backgroundColor: 'rgba(99, 102, 241, 0.1)', borderRadius: '50%' }}>
-                                                {uploading ? <Loader2 className="animate-spin" size={32} color="var(--primary)" /> : <UploadCloud size={32} color="var(--primary)" />}
+                        <div className={styles.section}>
+                            <h2 className={styles.sectionTitle}>Media (up to 4)</h2>
+                            <div className={styles.mediaGrid} style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
+                                {[0, 1, 2, 3].map((idx) => (
+                                    <div key={idx} className={styles.uploadArea} style={{ minHeight: '150px', padding: '1rem', position: 'relative' }}>
+                                        <input
+                                            type="file"
+                                            id={`file-upload-${idx}`}
+                                            hidden
+                                            accept="image/*"
+                                            onChange={(e) => handleFileChange(e, idx)}
+                                        />
+                                        {formData.images && formData.images[idx] ? (
+                                            <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                                                <img
+                                                    src={formData.images[idx]}
+                                                    alt={`Preview ${idx + 1}`}
+                                                    style={{ width: '100%', height: '120px', objectFit: 'cover', borderRadius: '8px' }}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeImage(idx)}
+                                                    style={{
+                                                        position: 'absolute',
+                                                        top: '-5px',
+                                                        right: '-5px',
+                                                        background: 'var(--error)',
+                                                        color: 'white',
+                                                        border: 'none',
+                                                        borderRadius: '50%',
+                                                        width: '20px',
+                                                        height: '20px',
+                                                        cursor: 'pointer',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center'
+                                                    }}
+                                                >
+                                                    <X size={14} />
+                                                </button>
+                                                {formData.image_url === formData.images[idx] ? (
+                                                    <span style={{
+                                                        position: 'absolute',
+                                                        bottom: '5px',
+                                                        left: '5px',
+                                                        background: 'var(--primary)',
+                                                        color: 'white',
+                                                        fontSize: '0.6rem',
+                                                        padding: '2px 6px',
+                                                        borderRadius: '4px',
+                                                        boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                                                    }}>
+                                                        Main
+                                                    </span>
+                                                ) : (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setAsMain(formData.images![idx])}
+                                                        style={{
+                                                            position: 'absolute',
+                                                            bottom: '5px',
+                                                            left: '5px',
+                                                            background: 'rgba(0,0,0,0.5)',
+                                                            color: 'white',
+                                                            fontSize: '0.6rem',
+                                                            padding: '2px 6px',
+                                                            borderRadius: '4px',
+                                                            border: 'none',
+                                                            cursor: 'pointer'
+                                                        }}
+                                                    >
+                                                        Set Main
+                                                    </button>
+                                                )}
                                             </div>
+                                        ) : (
+                                            <label htmlFor={`file-upload-${idx}`} style={{ cursor: 'pointer', display: 'block', height: '100%' }}>
+                                                <div className="flex-center" style={{ flexDirection: 'column', gap: '0.5rem', height: '100%' }}>
+                                                    <div style={{ padding: '0.5rem', backgroundColor: 'rgba(99, 102, 241, 0.1)', borderRadius: '50%' }}>
+                                                        <UploadCloud size={20} color="var(--primary)" />
+                                                    </div>
+                                                    <p style={{ fontSize: '0.75rem', fontWeight: 600 }}>Upload</p>
+                                                </div>
+                                            </label>
                                         )}
-                                        <div>
-                                            <p style={{ fontWeight: 600, color: 'var(--text-main)' }}>
-                                                {uploading ? 'Uploading...' : formData.image_url ? 'Click to change image' : 'Click to upload image'}
-                                            </p>
-                                            <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>SVG, PNG, JPG or GIF</p>
-                                        </div>
                                     </div>
-                                </label>
+                                ))}
                             </div>
+                            <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginTop: '1rem' }}>
+                                The first image will be used as the product thumbnail.
+                            </p>
                         </div>
                     </div>
 
@@ -244,11 +353,11 @@ export default function AddProductPage() {
                                     value={formData.status}
                                     onChange={handleChange}
                                 >
-                                    <option value="Draft">Draft</option>
-                                    <option value="Active">Active</option>
-                                    <option value="Archived">Archived</option>
-                                    <option value="Out of Stock">Out of Stock</option>
-                                    <option value="Low Stock">Low Stock</option>
+                                    <option>Draft</option>
+                                    <option>Active</option>
+                                    <option>Archived</option>
+                                    <option>Out of Stock</option>
+                                    <option>Low Stock</option>
                                 </select>
                             </div>
                         </div>
