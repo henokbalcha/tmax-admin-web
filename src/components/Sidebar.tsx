@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LayoutDashboard, Package, PlusCircle, Settings, LogOut, ShoppingCart, Image, Users } from 'lucide-react';
 import styles from './Sidebar.module.css';
+import { useAuth } from '@/contexts/AuthContext';
+import { api } from '@/lib/api';
 
 const menuItems = [
     { name: 'Dashboard', href: '/', icon: LayoutDashboard },
@@ -17,6 +19,16 @@ const menuItems = [
 
 export default function Sidebar() {
     const pathname = usePathname();
+    const { user, isAdmin } = useAuth();
+
+    const handleSignOut = async () => {
+        try {
+            await api.auth.signOut();
+            window.location.reload();
+        } catch (error) {
+            console.error('Failed to sign out:', error);
+        }
+    };
 
     return (
         <aside className={styles.sidebar}>
@@ -41,14 +53,23 @@ export default function Sidebar() {
             </nav>
 
             <div className={styles.footer}>
-                <div className={styles.avatar}>A</div>
-                <div className={styles.userInfo}>
-                    <h4>Admin User</h4>
-                    <p>admin@tmax.com</p>
+                <div className={styles.avatar}>
+                    {user?.user_metadata?.full_name?.charAt(0) || user?.email?.charAt(0).toUpperCase() || '?'}
                 </div>
-                <button className={styles.link} style={{ marginLeft: 'auto', padding: '0.5rem' }}>
-                    <LogOut size={18} />
-                </button>
+                <div className={styles.userInfo}>
+                    <h4>{user?.user_metadata?.full_name || (isAdmin ? 'Admin User' : 'Customer')}</h4>
+                    <p>{user?.email || 'Not signed in'}</p>
+                </div>
+                {user && (
+                    <button
+                        className={styles.link}
+                        style={{ marginLeft: 'auto', padding: '0.5rem' }}
+                        onClick={handleSignOut}
+                        title="Sign Out"
+                    >
+                        <LogOut size={18} />
+                    </button>
+                )}
             </div>
         </aside>
     );

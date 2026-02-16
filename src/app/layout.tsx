@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Sidebar from "@/components/Sidebar";
 
+import { AuthProvider } from "@/contexts/AuthContext";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -40,18 +42,20 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <div style={{ display: 'flex', minHeight: '100vh' }}>
-          <Sidebar />
-          <main style={{
-            flex: 1,
-            marginLeft: 'var(--sidebar-width)',
-            padding: '2rem',
-            backgroundColor: 'var(--bg-app)',
-            minHeight: '100vh'
-          }}>
-            {children}
-          </main>
-        </div>
+        <AuthProvider>
+          <div style={{ display: 'flex', minHeight: '100vh' }}>
+            <Sidebar />
+            <main style={{
+              flex: 1,
+              marginLeft: 'var(--sidebar-width)',
+              padding: '2rem',
+              backgroundColor: 'var(--bg-app)',
+              minHeight: '100vh'
+            }}>
+              {children}
+            </main>
+          </div>
+        </AuthProvider>
       </body>
     </html>
   );

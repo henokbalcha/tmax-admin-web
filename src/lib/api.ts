@@ -236,5 +236,44 @@ export const api = {
             if (error) throw error;
             return data;
         }
+    },
+    auth: {
+        async signUp(email: string, password: string, fullName: string) {
+            const { data, error } = await supabase.auth.signUp({
+                email,
+                password,
+                options: {
+                    data: {
+                        full_name: fullName,
+                    }
+                }
+            });
+            if (error) throw error;
+            return data;
+        },
+        async signIn(email: string, password: string) {
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+            });
+            if (error) throw error;
+            return data;
+        },
+        async signOut() {
+            const { error } = await supabase.auth.signOut();
+            if (error) throw error;
+        },
+        async getUser() {
+            const { data: { user }, error } = await supabase.auth.getUser();
+            if (error) return null;
+            return user;
+        },
+        async updateProfile(updates: { full_name?: string; avatar_url?: string }) {
+            const { data, error } = await supabase.auth.updateUser({
+                data: updates
+            });
+            if (error) throw error;
+            return data;
+        }
     }
 };
