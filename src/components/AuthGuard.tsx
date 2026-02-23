@@ -5,7 +5,7 @@ import Login from "./Login";
 import React from "react";
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
-    const { user, loading } = useAuth();
+    const { user, loading, isAdmin } = useAuth();
 
     if (loading) {
         return (
@@ -17,6 +17,10 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
 
     if (!user) {
         return <Login />;
+    }
+
+    if (!isAdmin) {
+        return <Login forcedError="Access Denied: You do not have administrator privileges." />;
     }
 
     return <>{children}</>;

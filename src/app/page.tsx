@@ -51,11 +51,12 @@ export default function Dashboard() {
         const productStats = await api.products.getStats();
         const orders = await api.orders.list();
 
-        const totalRev = orders.reduce((sum, o) => sum + o.total_amount, 0);
+        const activeOrders = orders.filter(o => o.status?.toLowerCase() !== 'cancelled');
+        const totalRev = activeOrders.reduce((sum, o) => sum + o.total_amount, 0);
 
         setStats({
           ...productStats,
-          orderCount: orders.length,
+          orderCount: activeOrders.length,
           revenue: totalRev,
           growth: 12
         });
@@ -63,7 +64,7 @@ export default function Dashboard() {
         // Simple aggregation for chart (last 7 days)
         const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
         const processedChart = days.map(day => {
-          const dayOrders = orders.filter(o => {
+          const dayOrders = activeOrders.filter(o => {
             const d = new Date(o.created_at);
             return d.getDay() === days.indexOf(day);
           });
