@@ -46,6 +46,7 @@ export interface Banner {
     subtitle: string;
     discount_text: string;
     image_url: string;
+    product_id?: string;
     active: boolean;
 }
 
@@ -198,9 +199,20 @@ export const api = {
                 .eq('id', id);
             if (error) throw error;
         },
+        async update(id: string, updates: Partial<Banner>) {
+            const { data, error } = await supabase
+                .from('banners')
+                .update(updates)
+                .eq('id', id)
+                .select()
+                .single();
+            if (error) throw error;
+            return data;
+        },
         async setActive(id: string) {
-            // First set all to inactive (optional if logic allows multiple, but usually one banner)
-            // For now, let's just update the target
+            // First deactivate all
+            await supabase.from('banners').update({ active: false }).neq('id', id);
+
             const { data, error } = await supabase
                 .from('banners')
                 .update({ active: true })

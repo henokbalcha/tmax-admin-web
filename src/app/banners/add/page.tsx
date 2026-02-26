@@ -10,11 +10,13 @@ function AddBannerForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [loading, setLoading] = useState(false);
+    const [products, setProducts] = useState<any[]>([]);
     const [formData, setFormData] = useState({
         title: '',
         subtitle: 'LIMITED OFFER',
         discount_text: '',
         image_url: '',
+        product_id: '',
         active: true
     });
 
@@ -29,13 +31,24 @@ function AddBannerForm() {
                 image_url: image || ''
             }));
         }
+
+        // Fetch products for the dropdown
+        async function fetchProducts() {
+            try {
+                const data = await api.products.list();
+                setProducts(data || []);
+            } catch (error) {
+                console.error('Failed to fetch products', error);
+            }
+        }
+        fetchProducts();
     }, [searchParams]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         try {
-            await api.banners.create(formData);
+            await api.banners.create(formData as any);
             router.push('/banners');
         } catch (error) {
             console.error(error);
@@ -146,6 +159,23 @@ function AddBannerForm() {
                             onChange={e => setFormData({ ...formData, discount_text: e.target.value })}
                             placeholder="e.g. Up to 40% Off"
                         />
+                    </div>
+
+                    <div>
+                        <label className="label">Link to Product</label>
+                        <select
+                            className="input"
+                            value={formData.product_id}
+                            onChange={e => setFormData({ ...formData, product_id: e.target.value })}
+                        >
+                            <option value="">No Product Linked</option>
+                            {products.map(p => (
+                                <option key={p.id} value={p.id}>{p.name} ({p.brand})</option>
+                            ))}
+                        </select>
+                        <p className="text-muted" style={{ fontSize: '0.8rem', marginTop: '0.25rem' }}>
+                            When clicked, the banner will navigate the user to this product.
+                        </p>
                     </div>
 
                     <div className="flex-center" style={{ justifyContent: 'flex-start', gap: '0.5rem' }}>
