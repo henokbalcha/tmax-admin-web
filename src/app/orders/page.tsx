@@ -14,12 +14,15 @@ export default function OrdersPage() {
 
     // Close menu when clicking outside
     useEffect(() => {
-        const handleClickOutside = () => setOpenMenuId(null);
-        document.addEventListener('click', handleClickOutside);
-        return () => {
-            document.removeEventListener('click', handleClickOutside);
+        const handleClickOutside = (event: MouseEvent) => {
+            const target = event.target as HTMLElement;
+            if (openMenuId && !target.closest(`.${styles.tdMenu}`)) {
+                setOpenMenuId(null);
+            }
         };
-    }, []);
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [openMenuId]);
 
     useEffect(() => {
         fetchOrders();
@@ -155,7 +158,7 @@ export default function OrdersPage() {
                                             </Link>
                                         </div>
                                     </td>
-                                    <td className={styles.tdMenu}>
+                                    <td className={styles.tdMenu} style={{ zIndex: openMenuId === order.id ? 101 : 1 }}>
                                         <button
                                             className={styles.menuButton}
                                             onClick={(e) => {

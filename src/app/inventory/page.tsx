@@ -15,6 +15,18 @@ export default function InventoryPage() {
     const [statusFilter, setStatusFilter] = useState('All');
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
+    // Close menu when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            const target = event.target as HTMLElement;
+            if (openMenuId && !target.closest(`.${styles.tdMenu}`)) {
+                setOpenMenuId(null);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [openMenuId]);
+
     useEffect(() => {
         fetchProducts();
     }, []);
@@ -207,12 +219,13 @@ export default function InventoryPage() {
                                             {product.status || 'Draft'}
                                         </span>
                                     </td>
-                                    <td className={styles.tdMenu}>
+                                    <td className={styles.tdMenu} style={{ zIndex: openMenuId === product.id ? 101 : 1 }}>
                                         <button
                                             className={styles.menuButton}
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                setOpenMenuId(openMenuId === product.id ? null : product.id!);
+                                                const newId = openMenuId === product.id ? null : product.id!;
+                                                setOpenMenuId(newId);
                                             }}
                                         >
                                             <MoreVertical size={18} />
