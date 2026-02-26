@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { MoreVertical, Filter, Download, Plus, Search, Trash2, Edit } from 'lucide-react';
+import { MoreVertical, Filter, Download, Plus, Search, Trash2, Edit, Package } from 'lucide-react';
 import Link from 'next/link';
 import styles from './page.module.css';
 import { api, Product } from '@/lib/api';
@@ -238,6 +238,22 @@ export default function InventoryPage() {
                                                 >
                                                     <Filter size={16} className={styles.dropdownIcon} />
                                                     Promote to Banner
+                                                </button>
+                                                <button
+                                                    className={styles.dropdownItem}
+                                                    onClick={async (e) => {
+                                                        e.stopPropagation();
+                                                        try {
+                                                            await api.products.update(product.id!, { status: 'Archived' });
+                                                            fetchProducts();
+                                                        } catch (err) {
+                                                            alert('Failed to archive');
+                                                        }
+                                                        setOpenMenuId(null);
+                                                    }}
+                                                >
+                                                    <Package size={16} className={styles.dropdownIcon} />
+                                                    Archive Item
                                                 </button>
                                                 <div className={styles.dropdownDivider}></div>
                                                 <button

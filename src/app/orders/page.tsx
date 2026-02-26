@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { api, Order } from '@/lib/api';
-import { MoreVertical, Search, Filter } from 'lucide-react';
+import { MoreVertical, Search, Filter, Trash2, Edit } from 'lucide-react';
 import Link from 'next/link';
 import styles from '../inventory/page.module.css'; // Reusing inventory styles
 
@@ -10,6 +10,16 @@ export default function OrdersPage() {
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
+    const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+
+    // Close menu when clicking outside
+    useEffect(() => {
+        const handleClickOutside = () => setOpenMenuId(null);
+        document.addEventListener('click', handleClickOutside);
+        return () => {
+            document.removeEventListener('click', handleClickOutside);
+        };
+    }, []);
 
     useEffect(() => {
         fetchOrders();
@@ -32,6 +42,23 @@ export default function OrdersPage() {
             fetchOrders();
         } catch (e) {
             alert('Failed to update status');
+        }
+    };
+
+    const handleDelete = async (id: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (!confirm('Are you sure you want to delete this order? This action cannot be undone.')) {
+            setOpenMenuId(null);
+            return;
+        }
+
+        try {
+            await api.orders.delete(id);
+            setOpenMenuId(null);
+            fetchOrders();
+        } catch (error: any) {
+            console.error("Delete failed", error);
+            alert(`Failed to delete order: ${error.message || error.toString()}`);
         }
     };
 
@@ -78,6 +105,7 @@ export default function OrdersPage() {
                                 <th className={styles.th}>Total</th>
                                 <th className={styles.th}>Status</th>
                                 <th className={styles.th}>Address</th>
+                                <th className={styles.th}></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -88,7 +116,7 @@ export default function OrdersPage() {
                                             {order.id.substring(0, 8).toUpperCase()}
                                         </Link>
                                     </td>
-                                    <td className={styles.td}>{new Date(order.created_at).toLocaleDateString()}</td>
+                                    <td className={styles.td} suppressHydrationWarning>{new Date(order.created_at).toLocaleDateString()}</td>
                                     <td className={styles.td}>{order.user_id.substring(0, 8)}...</td>
                                     <td className={styles.td}>
                                         {order.items?.map(item => (
@@ -126,6 +154,38 @@ export default function OrdersPage() {
                                                 View
                                             </Link>
                                         </div>
+                                    </td>
+                                    <td className={styles.tdMenu}>
+                                        <button
+                                            className={styles.menuButton}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setOpenMenuId(openMenuId === order.id ? null : order.id!);
+                                            }}
+                                        >
+                                            <MoreVertical size={18} />
+                                        </button>
+
+                                        {openMenuId === order.id && (
+                                            <div className={styles.dropdown} onClick={(e) => e.stopPropagation()}>
+                                                <Link
+                                                    href={`/orders/${order.id}`}
+                                                    className={styles.dropdownItem}
+                                                    onClick={() => setOpenMenuId(null)}
+                                                >
+                                                    <Edit size={16} className={styles.dropdownIcon} />
+                                                    Edit / View Details
+                                                </Link>
+                                                <div className={styles.dropdownDivider}></div>
+                                                <button
+                                                    className={`${styles.dropdownItem} ${styles.dropdownItemDelete}`}
+                                                    onClick={(e) => handleDelete(order.id!, e)}
+                                                >
+                                                    <Trash2 size={16} className={styles.dropdownIcon} />
+                                                    Delete Order
+                                                </button>
+                                            </div>
+                                        )}
                                     </td>
                                 </tr>
                             ))}

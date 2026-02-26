@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { api, Order } from '@/lib/api';
-import { ArrowLeft, Package, User, MapPin, CreditCard, Clock, Save, Printer } from 'lucide-react';
+import { ArrowLeft, Package, User, MapPin, CreditCard, Clock, Save, Printer, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 
 export default function OrderDetailPage() {
@@ -55,13 +55,32 @@ export default function OrderDetailPage() {
                     </Link>
                     <div>
                         <h1>Order #{order.id.substring(0, 8).toUpperCase()}</h1>
-                        <p className="text-muted">Placed on {new Date(order.created_at).toLocaleString()}</p>
+                        <p className="text-muted" suppressHydrationWarning>Placed on {new Date(order.created_at).toLocaleString()}</p>
                     </div>
                 </div>
-                <button className="btn btn-ghost" onClick={() => window.print()}>
-                    <Printer size={18} />
-                    Print Invoice
-                </button>
+                <div className="flex-center" style={{ gap: '1rem' }}>
+                    <button
+                        className="btn btn-ghost"
+                        style={{ color: 'var(--error)' }}
+                        onClick={async () => {
+                            if (confirm('Delete this order?')) {
+                                try {
+                                    await api.orders.delete(order.id);
+                                    router.push('/orders');
+                                } catch (e) {
+                                    alert('Delete failed');
+                                }
+                            }
+                        }}
+                    >
+                        <Trash2 size={18} />
+                        Delete Order
+                    </button>
+                    <button className="btn btn-ghost" onClick={() => window.print()}>
+                        <Printer size={18} />
+                        Print Invoice
+                    </button>
+                </div>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '2rem' }}>

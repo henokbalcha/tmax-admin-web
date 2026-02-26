@@ -172,6 +172,13 @@ export const api = {
                 .single();
             if (error) throw error;
             return data;
+        },
+        async delete(id: string) {
+            const { error } = await supabase
+                .from('orders')
+                .delete()
+                .eq('id', id);
+            if (error) throw error;
         }
     },
     banners: {
