@@ -164,9 +164,40 @@ export const api = {
             return data as Order[];
         },
         async updateStatus(id: string, status: string) {
+            const newStatus = status.toUpperCase();
+            // Get current order state to check if we are transitioning to/from CANCELLED
+            const { data: currentOrder, error: fetchError } = await supabase
+                .from('orders')
+                .select('status, items:order_items(*)')
+                .eq('id', id)
+                .single();
+
+            if (fetchError) throw fetchError;
+
+            const oldStatus = currentOrder.status.toUpperCase();
+
+            // Handle stock restoration on cancellation
+            if (newStatus === 'CANCELLED' && oldStatus !== 'CANCELLED') {
+                for (const item of currentOrder.items || []) {
+                    const { data: p } = await supabase.from('products').select('stock').eq('id', item.product_id).single();
+                    if (p) {
+                        await supabase.from('products').update({ stock: (p.stock || 0) + item.quantity }).eq('id', item.product_id);
+                    }
+                }
+            }
+            // Handle stock deduction if uncancelling
+            else if (newStatus !== 'CANCELLED' && oldStatus === 'CANCELLED') {
+                for (const item of currentOrder.items || []) {
+                    const { data: p } = await supabase.from('products').select('stock').eq('id', item.product_id).single();
+                    if (p) {
+                        await supabase.from('products').update({ stock: Math.max(0, (p.stock || 0) - item.quantity) }).eq('id', item.product_id);
+                    }
+                }
+            }
+
             const { data, error } = await supabase
                 .from('orders')
-                .update({ status })
+                .update({ status: newStatus })
                 .eq('id', id)
                 .select()
                 .single();
@@ -174,6 +205,15 @@ export const api = {
             return data;
         },
         async delete(id: string) {
+            // Delete order items first due to foreign key constraint
+            const { error: itemsError } = await supabase
+                .from('order_items')
+                .delete()
+                .eq('order_id', id);
+
+            if (itemsError) throw itemsError;
+
+            // Now delete the order
             const { error } = await supabase
                 .from('orders')
                 .delete()
